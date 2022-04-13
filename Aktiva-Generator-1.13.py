@@ -1,8 +1,10 @@
-from ctypes import sizeof
+
 import ipaddress
-from tkinter import END, SE, W, E, S, IntVar, Label, Tk, mainloop, Radiobutton, Button, Entry, PhotoImage,messagebox
+from msilib.schema import CheckBox
+from tkinter import END, SE, W, E, S, IntVar, Label, StringVar, Tk, mainloop, Radiobutton, Button, Entry, PhotoImage,messagebox
 import re
 from tkinter.scrolledtext import ScrolledText
+from turtle import color
 
 
 main = Tk()
@@ -69,6 +71,14 @@ def write():
         )
         outBox.insert(1.0, Ans)
 
+    elif host and range and var.get()==3:
+        Ans =("/interface bridge port set bridge=BD-"+ host + "-javne [find where interface=Gi1/4]\n\n"
+        "/interface ethernet set [find default-name=ether4] comment=\"Access_eSkoleUTM\" \n\n"
+        "/ip dhcp-server network add address=" + str(range) + slash + " dns-server=193.198.184.130,193.198.184.140 gateway=" + str(range+1) + "\n"
+        "/ip pool add name=Javni-pool ranges="+ str(range+3) +"\n"
+        "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP")
+        outBox.insert(1.0, Ans)
+
     else:
         msgBox()
 
@@ -81,20 +91,18 @@ def clear():
     field1.delete(0, END)
     field2.delete(0, END)
     outBox.delete(1.0, END)
+    fieldSlash.setvar("29")
 
-def setLabelRaspon():
-    if var.get()==1:
-        fieldSlash.config(text="/29")
-    else:
-        fieldSlash.config(text="")
+
+######TESTIRANJE#################################
 
 #def setLabelRaspon():
 #    if var.get()==1:
-#        labelRaspon.config(text="/29")
+#        fieldSlash.config(text="/29")
 #    else:
-#        labelRaspon.config(text="")   
+#        fieldSlash.config(text="")
 
-
+##################################################
 
 
 
@@ -103,7 +111,7 @@ main.geometry('1100x530')
 
 Label(main, text = "Unesi Hostname:").grid(row=0, column=1, sticky=W, pady=2, padx=150)
 Label(main, text = "Unesi javni raspon adresa:").grid(row=1, column=1,sticky=W, pady=2, padx=150)
-Label(main, text = "Mtik naredbe:").grid(row=3, column=1, sticky=W, padx=15)
+Label(main, text = "Mikrotik naredbe:",background='light grey').grid(row=3, column=1, sticky=W, padx=15)
 Label(main, text="/").grid(row=1,column=1,sticky=E,padx=330)
 
 #logoCarnet=PhotoImage(file="C:/Users/KrešimirŠodan/Downloads/carnetlogosmall2.png")
@@ -127,8 +135,10 @@ fieldSlash.grid(row=1, column=1, sticky=E, padx=316, pady=2)
 
 
 var=IntVar()
-Radiobutton(main, text="Rekonfig", variable=var, value=1, command=setLabelRaspon).grid(row=2,column=1,sticky=W, padx=325)
-Radiobutton(main, text="Firewall", variable=var, value=2, command=setLabelRaspon).grid(row=2,column=1)
+Radiobutton(main, text="Rekonfig", variable=var, value=1).grid(row=2,column=1,sticky=W, padx=325)
+Radiobutton(main, text="Firewall", variable=var, value=2).grid(row=2,column=1)
+Radiobutton(main, text="G3Rekonfig", variable=var, value=3).grid(row=2,column=1,sticky=E,padx=310)
+Radiobutton(main, text="G3Firewall", variable=var, value=4).grid(row=2,column=1,sticky=E,padx=205)
 
 
 Button(main, text='Očisti', command=clear, width=10).grid(row=1, column=2, sticky=W, padx=2, pady=2)

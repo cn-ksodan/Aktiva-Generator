@@ -1,5 +1,6 @@
 
 import ipaddress
+import webbrowser
 from msilib.schema import CheckBox
 from tkinter import END, SE, W, E, S, IntVar, Label, StringVar, Tk, mainloop, Radiobutton, Button, Entry, PhotoImage,messagebox
 import re
@@ -81,6 +82,23 @@ def write():
 
     else:
         msgBox()
+
+##############UNDER CONSTRUCTION#################
+
+def sendMail():
+    webbrowser.open('mailto:ksodan@carnet.hr', new=1)
+
+    recipient = 'rt+mreza-eskole@tt.carnet.hr'
+    subject = '111 - 111 - Osnovna škola IME, Adresa, 10000 Zagreb - MZOS-OS-ZG-HOSTNAME-1 - rekonfiguracija'
+    subject = subject.replace(' ', '%20')
+    body='BEZVEZE TESTIRAM'
+
+    webbrowser.open('mailto:?to=' + recipient + '&subject=' + subject + '&body=' + body, new=1)
+
+##################################################
+
+
+
 
 def msgBox():
     #messagebox.showerror('error', 'Unesi hostname i javni raspon adresa')

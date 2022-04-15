@@ -1,4 +1,5 @@
 
+from cgitb import text
 import ipaddress
 import webbrowser
 from msilib.schema import CheckBox
@@ -77,7 +78,8 @@ def write():
         "/interface ethernet set [find default-name=ether4] comment=\"Access_eSkoleUTM\" \n\n"
         "/ip dhcp-server network add address=" + str(range) + slash + " dns-server=193.198.184.130,193.198.184.140 gateway=" + str(range+1) + "\n"
         "/ip pool add name=Javni-pool ranges="+ str(range+3) +"\n"
-        "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP")
+        "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP \n\n"
+        "/ip firewall nat set [find where chain=srcnat] to-address=" + str(range+6)+"\n")
         outBox.insert(1.0, Ans)
 
     else:
@@ -89,7 +91,7 @@ def sendMail():
     webbrowser.open('mailto:ksodan@carnet.hr', new=1)
 
     recipient = 'rt+mreza-eskole@tt.carnet.hr'
-    subject = '111 - 111 - Osnovna škola IME, Adresa, 10000 Zagreb - MZOS-OS-ZG-HOSTNAME-1 - rekonfiguracija'
+    subject = titleGen()
     subject = subject.replace(' ', '%20')
     body='BEZVEZE TESTIRAM'
 
@@ -110,6 +112,30 @@ def clear():
     field2.delete(0, END)
     outBox.delete(1.0, END)
     fieldSlash.setvar("29")
+
+
+def titleGen():
+    test=field3.get().upper()
+
+    tehnologijaSpajanja=['DSL','GSM','HIBRID']
+    # RI za IPv4 adrese
+    allIP = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",test)
+    hostName= str(re.search("MZOS-(.{5,30})-1",test).group())
+    nazivAdresa= str(re.search(r"([A-Z]{1})(.{20,100})\d{5}",test).group()) + ' '
+
+    test=(test.split())
+    idProjCN=test[0] + ' - ' + test[1] + ' - '
+
+    #provjera adrese na koju se spajamo ovisno o tehnologiji spajanja
+    if any (i in test for i in tehnologijaSpajanja):
+        AdresaIP=ipaddress.IPv4Address(allIP[3])+2
+    else:
+        AdresaIP=ipaddress.IPv4Address(allIP[3])+1
+
+    #Generiranje naslova
+    title=idProjCN + '[' + str(AdresaIP) + '] - ' + nazivAdresa + hostName + ' - rekonfiguracija' 
+    return title
+
 
 
 ######TESTIRANJE#################################
@@ -136,6 +162,7 @@ Label(main, text="/").grid(row=1,column=1,sticky=E,padx=330)
 outBox = ScrolledText(main, height=23, width=111, pady=20)
 field1 = Entry(main, width=40)
 field2 = Entry(main, width=40)
+field3 = Entry(main, width=40)
 fieldSlash = Entry(main, width=2,fg='grey')
 fieldSlash.insert(1 ,"29")
 #labelRaspon = Label(main,text="")
@@ -148,6 +175,7 @@ logoCarnetLabel.grid(row=4,column=2,columnspan=2,sticky=S,pady=15)
 outBox.grid(row=4, column=1, padx=10)
 field1.grid(row=0, column=1, pady=2)
 field2.grid(row=1, column=1, pady=2)
+field3.grid(row=3, column=1, pady=2)
 fieldSlash.grid(row=1, column=1, sticky=E, padx=316, pady=2)
 #labelRaspon.grid(row=1,column=1,sticky=E, padx=295)
 
@@ -162,6 +190,7 @@ Radiobutton(main, text="G3Firewall", variable=var, value=4).grid(row=2,column=1,
 Button(main, text='Očisti', command=clear, width=10).grid(row=1, column=2, sticky=W, padx=2, pady=2)
 Button(main, text='Zatvori', command=main.destroy, width=10).grid(row=1, column=3, sticky=W, padx=2, pady=2)
 Button(main, text='Ispiši', command=write, width=22).grid(row=0, column=2, columnspan=2, padx=2, pady=2)
+Button(main, text="E-mail", command=sendMail, width=22).grid(row=2, column=2, columnspan=2, sticky=W, padx=2, pady=2)
 
 
 

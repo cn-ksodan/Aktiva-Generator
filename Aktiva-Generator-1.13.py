@@ -1,12 +1,9 @@
-
-from cgitb import text
 import ipaddress
 import webbrowser
 from msilib.schema import CheckBox
-from tkinter import END, SE, W, E, S, IntVar, Label, StringVar, Tk, mainloop, Radiobutton, Button, Entry, PhotoImage,messagebox
+from tkinter import END, W, E, S, IntVar, Label, StringVar, Tk, mainloop, Radiobutton, Button, Entry, PhotoImage, messagebox
 import re
 from tkinter.scrolledtext import ScrolledText
-from turtle import color
 
 
 main = Tk()
@@ -88,14 +85,41 @@ def write():
 ##############UNDER CONSTRUCTION#################
 
 def sendMail():
-    webbrowser.open('mailto:ksodan@carnet.hr', new=1)
+    if(field3.get()):
 
-    recipient = 'rt+mreza-eskole@tt.carnet.hr'
-    subject = titleGen()
-    subject = subject.replace(' ', '%20')
-    body='BEZVEZE TESTIRAM'
+        #zastavica promjene konfiguracije
+        flagInic=0
+        recipient = 'rt+mreza-eskole@tt.carnet.hr'
+        subject, allIP, vlanID = titleGen()
 
-    webbrowser.open('mailto:?to=' + recipient + '&subject=' + subject + '&body=' + body, new=1)
+        #Provjera promjene PtP adrese
+        if allIP[0]==allIP[1]:
+            body=allIP[1] + '/30'
+        else:
+            body=allIP[0] + '/30 -> ' + allIP[1]+'/30'
+            flagInic=1
+        
+        #Provjera promjene javne adrese
+        if allIP[2]==allIP[3]:
+            body=body + '%0D%0A' + allIP[3]
+        else:
+            body=body + '%0D%0A' + allIP[2] + ' -> ' + allIP[3]
+            flagInic=1
+        
+        #Provjera promjene Vlan ID-a
+        if vlanID[2]==vlanID[3]:
+            body=body + '%0D%0A' + vlanID[-1]
+        else:
+            body=body + '%0D%0A' + vlanID[-2] + ' -> ' + vlanID[-1]
+            flagInic=1
+        
+        body=body + '%0D%0A%0D%0A**** TODO ****'
+        
+
+        webbrowser.open('mailto:?to=' + recipient + '&subject=' + subject + '&body=' + body, new=1)
+    
+    else:
+     msgBox()
 
 ##################################################
 
@@ -115,27 +139,38 @@ def clear():
 
 
 def titleGen():
-    test=field3.get().upper()
+    titleField=field3.get().upper()
 
     tehnologijaSpajanja=['DSL','GSM','HIBRID']
-    # RI za IPv4 adrese
-    allIP = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",test)
-    hostName= str(re.search("MZOS-(.{5,30})-1",test).group())
-    nazivAdresa= str(re.search(r"([A-Z]{1})(.{20,100})\d{5}",test).group()) + ' '
 
-    test=(test.split())
-    idProjCN=test[0] + ' - ' + test[1] + ' - '
+    # RE za IPv4 adrese, subnet, hostname, naziv ustanove i adresu, vlan id
+    allIP = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",titleField)
+    hostName=re.findall(r"\bMZOS-[\w-]+-1\b", titleField)[1]
+    nazivAdresa= str(re.search(r"([A-Z]{1})(.{20,100})\d{5}",titleField).group()) + ' '
+    vlanID=re.findall(r"\b\d{4}\b",titleField)
+    subnetIP=re.findall(r'[/]\d{2}',titleField)
+    titleField=(titleField.split())
+    idProjCN=titleField[0] + ' - ' + titleField[1] + ' - '
+
+    #
+    for i in range(len(allIP)):
+        subnetIP[i]=allIP[i]+subnetIP[i]
 
     #provjera adrese na koju se spajamo ovisno o tehnologiji spajanja
-    if any (i in test for i in tehnologijaSpajanja):
-        AdresaIP=ipaddress.IPv4Address(allIP[3])+2
+    if any (i in titleField for i in tehnologijaSpajanja):
+        adresaIP=ipaddress.IPv4Address(allIP[3])+2
     else:
-        AdresaIP=ipaddress.IPv4Address(allIP[3])+1
+        adresaIP=ipaddress.IPv4Address(allIP[3])+1
 
     #Generiranje naslova
-    title=idProjCN + '[' + str(AdresaIP) + '] - ' + nazivAdresa + hostName + ' - rekonfiguracija' 
-    return title
+    title=idProjCN + '[' + str(adresaIP) + '] - ' + nazivAdresa + ' ' + hostName + ' - rekonfiguracija'
 
+    #zamjena whitespace-ova, tabova sa jednim whitespace-om
+    title=re.sub(r'\s+','%20',title)
+
+    return title, subnetIP, vlanID
+
+#1015 - 1896 - [82.132.6.225] - OSNOVNA ŠKOLA RUDEŠJABLANSKA ULICA 51ZAGREB10000  OS-ZG-RUDES-1MZOS-OS-ZG-RUDES - rekonfiguracija
 
 
 ######TESTIRANJE#################################
@@ -151,10 +186,11 @@ def titleGen():
 
 
 
-main.geometry('1100x530')
+main.geometry('1100x540')
 
-Label(main, text = "Unesi Hostname:").grid(row=0, column=1, sticky=W, pady=2, padx=150)
-Label(main, text = "Unesi javni raspon adresa:").grid(row=1, column=1,sticky=W, pady=2, padx=150)
+Label(main, text = "Hostname:").grid(row=0, column=1, sticky=W, pady=2, padx=255)
+Label(main, text = "Javni range:").grid(row=1, column=1,sticky=W, pady=2, padx=255)
+Label(main, text = "Mail(text):").grid(row=3, column=1,sticky=W, padx=255)
 Label(main, text = "Mikrotik naredbe:",background='light grey').grid(row=3, column=1, sticky=W, padx=15)
 Label(main, text="/").grid(row=1,column=1,sticky=E,padx=330)
 
@@ -181,10 +217,10 @@ fieldSlash.grid(row=1, column=1, sticky=E, padx=316, pady=2)
 
 
 var=IntVar()
-Radiobutton(main, text="Rekonfig", variable=var, value=1).grid(row=2,column=1,sticky=W, padx=325)
-Radiobutton(main, text="Firewall", variable=var, value=2).grid(row=2,column=1)
-Radiobutton(main, text="G3Rekonfig", variable=var, value=3).grid(row=2,column=1,sticky=E,padx=310)
-Radiobutton(main, text="G3Firewall", variable=var, value=4).grid(row=2,column=1,sticky=E,padx=205)
+Radiobutton(main, text="Rekonfig", variable=var, value=1).grid(row=2,column=1, sticky=W, padx=265)
+Radiobutton(main, text="Firewall", variable=var, value=2).grid(row=2,column=1, sticky=W, padx=345)
+Radiobutton(main, text="G3Rekonfig", variable=var, value=3).grid(row=2,column=1)
+Radiobutton(main, text="G3Firewall", variable=var, value=4).grid(row=2,column=1, sticky=E, padx=335)
 
 
 Button(main, text='Očisti', command=clear, width=10).grid(row=1, column=2, sticky=W, padx=2, pady=2)

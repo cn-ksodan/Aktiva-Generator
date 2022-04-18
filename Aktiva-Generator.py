@@ -1,8 +1,9 @@
 import ipaddress
+from logging import root
 from operator import length_hint
 import webbrowser
 from msilib.schema import CheckBox
-from tkinter import END, W, E, S, IntVar, Label, StringVar, Tk, mainloop, Radiobutton, Button, Entry, PhotoImage, messagebox
+from tkinter import END, W, E, S, IntVar, Label, StringVar, Tk, mainloop, Radiobutton, Button, Entry, messagebox
 import re
 from tkinter.scrolledtext import ScrolledText
 
@@ -92,34 +93,49 @@ def sendMail():
         flagInic=0
         recipient = 'rt+mreza-eskole@tt.carnet.hr'
         subject, allIP, vlanID = titleGen()
+        body=''
 
-        if len(allIP)>3:
-            #Provjera promjene PtP adrese
-            if allIP[0]==allIP[1]:
-                body=allIP[1]
-            else:
-                body=allIP[0] + ' -> ' + allIP[1]
-                flagInic=1
-            
-            #Provjera promjene javne adrese
-            if allIP[2]==allIP[3]:
-                body=body + '%0D%0A' + allIP[3]
-            else:
-                body=body + '%0D%0A' + allIP[2] + ' -> ' + allIP[3]
-                flagInic=1
-            
-            #Provjera promjene Vlan ID-a
-            if vlanID[-1]==vlanID[-2]:
-                body=body + '%0D%0A' + vlanID[-1]
-            else:
-                body=body + '%0D%0A' + vlanID[-2] + ' -> ' + vlanID[-1]
-                flagInic=1
-        else:
-            body=allIP[0] + '%0D%0A' + allIP[-1]  + '%0D%0A' + vlanID[-1]
+        print(allIP)
         
+        #Provjera promjene PtP i javne IP adrese:
+        if len(allIP)==1:
+            body=allIP[0]
+        else:
+            if ipaddress.ip_network(allIP[0]).is_private and ipaddress.ip_network(allIP[1]).is_private:
+                if allIP[0]==allIP[1]:
+                    body=allIP[1]
+                else:
+                    body=allIP[0] + ' -> ' + allIP[1]
+                    flagInic=1
+            elif ipaddress.ip_network(allIP[0]).is_private:
+                body=allIP[0]
+
+            if ipaddress.ip_network(allIP[-1]).is_global and ipaddress.ip_network(allIP[-2]).is_global:
+                if allIP[-1]==allIP[-2]:
+                    body=body + '%0D%0A' + allIP[-1]
+                else:
+                    body=body + '%0D%0A' + allIP[-2] + ' -> ' + allIP[-1]
+                    flagInic=1
+            elif ipaddress.ip_network(allIP[-1]).is_global:
+                body=body + '%0D%0A' + allIP[-1]
+            
+        #stvaranje filtirrane liste jer se p
+        vlanIDfiltered=[x for x in vlanID if len(x)==4]
+
+        if len(vlanID)>=2:
+            if vlanID[-1]==vlanID[-2]:
+                    body=body + '%0D%0A' + vlanID[-1]
+            else:
+                    body=body + '%0D%0A' + vlanID[-2] + ' -> ' + vlanID[-1]
+                    flagInic=1
+        elif len(vlanID)==1:
+            body = body + '%0D%0A' + vlanID[-1]
+        
+
         body=body + '%0D%0A%0D%0A**** TODO ****'
 
         webbrowser.open('mailto:?to=' + recipient + '&subject=' + subject + '&body=' + body, new=1)
+        
     
     else:
      msgBox()
@@ -147,27 +163,24 @@ def titleGen():
     tehnologijaSpajanja=['DSL','GSM','HIBRID']
 
     # RE za IPv4 adrese, subnet, hostname, naziv ustanove i adresu, vlan id
-    allIP = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",titleField)
+    allIP = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}[/]\d{2}",titleField)
     hostName=re.findall(r"\bMZOS-[\w-]+-1\b", titleField)[-1]
     nazivAdresa= str(re.search(r"([A-Z]{1})(.{20,100})\d{5}",titleField).group()) + ' '
-    vlanID=re.findall(r"\w+\d{2,4}\w+",titleField)
-    #za specificne slucajeve vlanID zna ispasti == postanskom broju, provjera
-    if len(vlanID[-1])>4:
-        vlanID=' '
-    subnetIP=re.findall(r'[/]\d{2}',titleField)
+    vlanID=re.findall(r"\b\d{4}\b",titleField[30:])
+    #subnetIP=re.findall(r'[/]\d{2}',titleField)
     titleField=(titleField.split())
     idProjCN=titleField[0] + ' - ' + titleField[1] + ' - '
 
     #
-    for i in range(len(allIP)):
-        subnetIP[i]=allIP[i]+subnetIP[i]
+    #for i in range(len(allIP)):
+    #    subnetIP[i]=allIP[i]+subnetIP[i]
 
 
     #provjera adrese na koju se spajamo ovisno o tehnologiji spajanja
     if any (i in titleField for i in tehnologijaSpajanja):
-        adresaIP=ipaddress.IPv4Address(allIP[-1])+2
+        adresaIP=(ipaddress.IPv4Network(allIP[-1]).network_address)+2
     else:
-        adresaIP=ipaddress.IPv4Address(allIP[-1])+1
+        adresaIP=(ipaddress.IPv4Network(allIP[-1]).network_address)+1
 
     #Generiranje naslova
     title=idProjCN + '[' + str(adresaIP) + '] - ' + nazivAdresa + ' - ' + hostName + ' - rekonfiguracija'
@@ -175,7 +188,7 @@ def titleGen():
     #zamjena whitespace-ova, tabova sa jednim whitespace-om
     title=re.sub(r'\s+','%20',title)
 
-    return title, subnetIP, vlanID
+    return title, allIP, vlanID
 
 #1015 - 1896 - [82.132.6.225] - OSNOVNA ŠKOLA RUDEŠJABLANSKA ULICA 51ZAGREB10000  OS-ZG-RUDES-1MZOS-OS-ZG-RUDES - rekonfiguracija
 
@@ -221,6 +234,7 @@ field2.grid(row=1, column=1, pady=2)
 field3.grid(row=3, column=1, pady=2)
 fieldSlash.grid(row=1, column=1, sticky=E, padx=316, pady=2)
 #labelRaspon.grid(row=1,column=1,sticky=E, padx=295)
+
 
 
 var=IntVar()

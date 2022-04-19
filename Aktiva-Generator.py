@@ -160,7 +160,7 @@ def clear():
 def titleGen():
     titleField=field3.get().upper()
 
-    tehnologijaSpajanja=['DSL','GSM','HIBRID']
+    tehnologijaSpajanja=['ADSL','VDSL','GSM','HIBRID']
 
     # RE za IPv4 adrese, subnet, hostname, naziv ustanove i adresu, vlan id
     allIP = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}[/]\d{2}",titleField)

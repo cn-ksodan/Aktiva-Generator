@@ -1,7 +1,6 @@
 import ipaddress
 import webbrowser
-from msilib.schema import CheckBox
-from tkinter import END, W, E, S, IntVar, Label, StringVar, Tk, mainloop, Radiobutton, Button, Entry, messagebox
+from tkinter import END, W, E, S, Checkbutton, IntVar, Label, StringVar, Tk, mainloop, Radiobutton, Button, Entry, messagebox
 import re
 from tkinter.scrolledtext import ScrolledText
 
@@ -73,58 +72,60 @@ def write():
     elif host and range and var.get()==3:
         Ans =("/interface bridge port set bridge=BD-"+ host + "-javne [find where interface=Gi1/4]\n\n"
         "/interface ethernet set [find default-name=ether4] comment=\"Access_eSkoleUTM\" \n\n"
-        "/ip dhcp-server network add address=" + str(range) + slash + " dns-server=193.198.184.130,193.198.184.140 gateway=" + str(range+1) + "\n"
+        "/ip dhcp-server network add address=" + str(range) + slash + " dns-server=193.198.184.130,193.198.184.140 gateway=" + str(range+1+var2.get()) + "\n"
         "/ip pool add name=Javni-pool ranges="+ str(range+3) +"\n"
         "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP \n\n"
-        "/ip firewall nat set [find where chain=srcnat] to-address=" + str(range+6)+"\n")
-        "/ip address add address="+str(range+6)+" interface=BD-"+host+"-javne"
+        "/ip firewall nat set [find where chain=srcnat] to-address=" + str(range+6)+"\n"
+        "/ip address add address="+str(range+6)+" interface=BD-"+host+"-javne\n"
+        )
+        
         outBox.insert(1.0, Ans)
     
     elif host and range and var.get()==4:
         Ans = ("/ip firewall address-list"
-                "remove [find]"
-                "add address=161.53.12.0/24 list=PL-CARNet\n"
-                "add address=193.198.220.64/26 list=PL-CARNet\n"
-                "add address=161.53.178.142/32 list=PL-CARNet\n"
-                "add address=172.17.128.0/26 list=PL-CARNet\n"                
-                "add address=10.0.0.0/8 list=PL-privatne\n"
-                "add address=172.16.0.0/12 list=PL-privatne\n"
-                "add address=192.168.0.0/16 list=PL-privatne\n"
-                "add address="+ str(range) + slash + " list=PL-"+ host +"\n"
-                "add address=192.168.30.0/23 list=PL-"+ host +"-privatne\n"
+        "remove [find]"
+        "add address=161.53.12.0/24 list=PL-CARNet\n"
+        "add address=193.198.220.64/26 list=PL-CARNet\n"
+        "add address=161.53.178.142/32 list=PL-CARNet\n"
+        "add address=172.17.128.0/26 list=PL-CARNet\n"                
+        "add address=10.0.0.0/8 list=PL-privatne\n"
+        "add address=172.16.0.0/12 list=PL-privatne\n"
+        "add address=192.168.0.0/16 list=PL-privatne\n"
+        "add address="+ str(range) + slash + " list=PL-"+ host +"\n"
+        "add address=192.168.30.0/23 list=PL-"+ host +"-privatne\n"
 
-            "/ip firewall filter\n"
-                "remove [find where dynamic=no]\n\n"
+        "/ip firewall filter\n"
+        "remove [find where dynamic=no]\n\n"
 
-                    "add action=drop chain=input port=8291 protocol=tcp src-address-list=!PL-CARNet\n"
-                    "add action=jump chain=forward in-interface=BD-"+host+"jump-target=prema_jezgri11\n"
-                    "add action=jump chain=forward in-interface=BD-"+host+"-privatne jump-target=prema_jezgri12\n"
-                    "add action=jump chain=forward jump-target=prema_pristupu12 out-interface=BD-"+host+"-privatne\n\n"
+        "add action=drop chain=input port=8291 protocol=tcp src-address-list=!PL-CARNet\n"
+        "add action=jump chain=forward in-interface=BD-"+host+"jump-target=prema_jezgri11\n"
+        "add action=jump chain=forward in-interface=BD-"+host+"-privatne jump-target=prema_jezgri12\n"
+        "add action=jump chain=forward jump-target=prema_pristupu12 out-interface=BD-"+host+"-privatne\n\n"
 
-                    "add chain=prema_jezgri11 action=drop protocol=tcp port=135,139,445\n"
-                    "add chain=prema_jezgri11 action=drop protocol=udp port=17,19,135,137,138,1900\n"
-                    "add chain=prema_jezgri11 action=drop protocol=tcp src-address-list=PL-"+host+" dst-address-list=PL-privatne\n"
-                    "add chain=prema_jezgri11 action=drop protocol=udp src-address-list=PL-"+host+" dst-address-list=PL-privatne\n"
-                    "add chain=prema_jezgri11 action=drop protocol=icmp src-address-list=PL-"+host+" dst-address-list=PL-privatne\n"
-                    "add chain=prema_jezgri11 action=accept src-address-list=PL-"+host+" dst-address=0.0.0.0/0\n"
-                    "add chain=prema_jezgri11 action=drop src-address=0.0.0.0/0 dst-address=0.0.0.0/0\n\n"
+        "add chain=prema_jezgri11 action=drop protocol=tcp port=135,139,445\n"
+        "add chain=prema_jezgri11 action=drop protocol=udp port=17,19,135,137,138,1900\n"
+        "add chain=prema_jezgri11 action=drop protocol=tcp src-address-list=PL-"+host+" dst-address-list=PL-privatne\n"
+        "add chain=prema_jezgri11 action=drop protocol=udp src-address-list=PL-"+host+" dst-address-list=PL-privatne\n"
+        "add chain=prema_jezgri11 action=drop protocol=icmp src-address-list=PL-"+host+" dst-address-list=PL-privatne\n"
+        "add chain=prema_jezgri11 action=accept src-address-list=PL-"+host+" dst-address=0.0.0.0/0\n"
+        "add chain=prema_jezgri11 action=drop src-address=0.0.0.0/0 dst-address=0.0.0.0/0\n\n"
 
-                    "add action=drop chain=prema_pristupu12 port=135,139,445 protocol=tcp\n"
-                    "add action=drop chain=prema_pristupu12 port=135,137,138 protocol=udp\n"
-                    "add action=accept chain=prema_pristupu12 dst-address-list=PL-"+host+"-privatne port=1720,1731,3601 protocol=tcp\n"
-                    "add action=accept chain=prema_pristupu12 connection-state=established dst-address-list=PL-"+host+"-privatne protocol=tcp\n"
-                    "add action=accept chain=prema_pristupu12 dst-address-list=PL-"+host+"-privatne protocol=udp\n"
-                    "add action=accept chain=prema_pristupu12 dst-address-list=PL-"+host+"-privatne protocol=icmp\n"
-                    "add action=drop chain=prema_pristupu12 dst-address=0.0.0.0/0 src-address=0.0.0.0/0\n\n"
+        "add action=drop chain=prema_pristupu12 port=135,139,445 protocol=tcp\n"
+        "add action=drop chain=prema_pristupu12 port=135,137,138 protocol=udp\n"
+        "add action=accept chain=prema_pristupu12 dst-address-list=PL-"+host+"-privatne port=1720,1731,3601 protocol=tcp\n"
+        "add action=accept chain=prema_pristupu12 connection-state=established dst-address-list=PL-"+host+"-privatne protocol=tcp\n"
+        "add action=accept chain=prema_pristupu12 dst-address-list=PL-"+host+"-privatne protocol=udp\n"
+        "add action=accept chain=prema_pristupu12 dst-address-list=PL-"+host+"-privatne protocol=icmp\n"
+        "add action=drop chain=prema_pristupu12 dst-address=0.0.0.0/0 src-address=0.0.0.0/0\n\n"
 
-                    "add action=drop chain=prema_jezgri12 port=135,139,445 protocol=tcp\n"
-                    "add action=drop chain=prema_jezgri12 port=17,19,135,137,138,1900 protocol=udp\n"
-                    "add action=drop chain=prema_jezgri12 dst-address-list=PL-privatne protocol=tcp src-address-list=PL-"+host+"-privatne\n"
-                    "add action=drop chain=prema_jezgri12 dst-address-list=PL-privatne protocol=udp src-address-list=PL-"+host+"-privatne\n"
-                    "add action=drop chain=prema_jezgri12 dst-address-list=PL-privatne protocol=icmp src-address-list=PL-"+host+"-privatne\n"
-                    "add action=accept chain=prema_jezgri12 dst-address=0.0.0.0/0 src-address-list=PL-"+host+"-privatne\n"
-                    "add action=accept chain=prema_jezgri12 dst-address=0.0.0.0/0 protocol=icmp src-address-list=PL-"+host+"-privatne\n"
-                    "add action=drop chain=prema_jezgri12 dst-address=0.0.0.0/0 src-address=0.0.0.0/0 ")
+        "add action=drop chain=prema_jezgri12 port=135,139,445 protocol=tcp\n"
+        "add action=drop chain=prema_jezgri12 port=17,19,135,137,138,1900 protocol=udp\n"
+        "add action=drop chain=prema_jezgri12 dst-address-list=PL-privatne protocol=tcp src-address-list=PL-"+host+"-privatne\n"
+        "add action=drop chain=prema_jezgri12 dst-address-list=PL-privatne protocol=udp src-address-list=PL-"+host+"-privatne\n"
+        "add action=drop chain=prema_jezgri12 dst-address-list=PL-privatne protocol=icmp src-address-list=PL-"+host+"-privatne\n"
+        "add action=accept chain=prema_jezgri12 dst-address=0.0.0.0/0 src-address-list=PL-"+host+"-privatne\n"
+        "add action=accept chain=prema_jezgri12 dst-address=0.0.0.0/0 protocol=icmp src-address-list=PL-"+host+"-privatne\n"
+        "add action=drop chain=prema_jezgri12 dst-address=0.0.0.0/0 src-address=0.0.0.0/0 ")
         outBox.insert(1.0, Ans)
 
     else:
@@ -284,11 +285,12 @@ fieldSlash.grid(row=1, column=1, sticky=E, padx=316, pady=2)
 
 
 var=IntVar()
+var2=IntVar()
 Radiobutton(main, text="Rekonfig", variable=var, value=1).grid(row=2,column=1, sticky=W, padx=265)
 Radiobutton(main, text="Firewall", variable=var, value=2).grid(row=2,column=1, sticky=W, padx=345)
 Radiobutton(main, text="G3Rekonfig", variable=var, value=3).grid(row=2,column=1)
 Radiobutton(main, text="G3Firewall", variable=var, value=4).grid(row=2,column=1, sticky=E, padx=335)
-
+Checkbutton(main, text="xDSL/GSM", variable=var2,selectcolor='red', offvalue=0,onvalue=1).grid(row=2,column=1,sticky=E, padx=100)
 
 Button(main, text='Očisti', command=clear, width=10).grid(row=1, column=2, sticky=W, padx=2, pady=2)
 Button(main, text='Zatvori', command=main.destroy, width=10).grid(row=1, column=3, sticky=W, padx=2, pady=2)

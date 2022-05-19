@@ -290,7 +290,7 @@ Radiobutton(main, text="Rekonfig", variable=var, value=1).grid(row=2,column=1, s
 Radiobutton(main, text="Firewall", variable=var, value=2).grid(row=2,column=1, sticky=W, padx=345)
 Radiobutton(main, text="G3Rekonfig", variable=var, value=3).grid(row=2,column=1)
 Radiobutton(main, text="G3Firewall", variable=var, value=4).grid(row=2,column=1, sticky=E, padx=335)
-Checkbutton(main, text="xDSL/GSM", variable=var2,selectcolor='red', offvalue=0,onvalue=1).grid(row=2,column=1,sticky=E, padx=100)
+Checkbutton(main, text="xDSL/GSM", variable=var2, activeforeground='red', offvalue=0, onvalue=1).grid(row=2,column=1,sticky=E, padx=100)
 
 Button(main, text='Očisti', command=clear, width=10).grid(row=1, column=2, sticky=W, padx=2, pady=2)
 Button(main, text='Zatvori', command=main.destroy, width=10).grid(row=1, column=3, sticky=W, padx=2, pady=2)

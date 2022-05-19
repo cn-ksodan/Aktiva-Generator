@@ -82,8 +82,8 @@ def write():
         outBox.insert(1.0, Ans)
     
     elif host and range and var.get()==4:
-        Ans = ("/ip firewall address-list"
-        "remove [find]"
+        Ans = ("/ip firewall address-list\n" 
+        "remove [find]\n"
         "add address=161.53.12.0/24 list=PL-CARNet\n"
         "add address=193.198.220.64/26 list=PL-CARNet\n"
         "add address=161.53.178.142/32 list=PL-CARNet\n"
@@ -92,15 +92,15 @@ def write():
         "add address=172.16.0.0/12 list=PL-privatne\n"
         "add address=192.168.0.0/16 list=PL-privatne\n"
         "add address="+ str(range) + slash + " list=PL-"+ host +"\n"
-        "add address=192.168.30.0/23 list=PL-"+ host +"-privatne\n"
+        "add address=192.168.30.0/23 list=PL-"+ host +"-privatne\n\n"
 
         "/ip firewall filter\n"
         "remove [find where dynamic=no]\n\n"
 
         "add action=drop chain=input port=8291 protocol=tcp src-address-list=!PL-CARNet\n"
-        "add action=jump chain=forward in-interface=BD-"+host+"jump-target=prema_jezgri11\n"
-        "add action=jump chain=forward in-interface=BD-"+host+"-privatne jump-target=prema_jezgri12\n"
-        "add action=jump chain=forward jump-target=prema_pristupu12 out-interface=BD-"+host+"-privatne\n\n"
+        "add action=jump chain=forward in-interface=BD-"+host+"-javne jump-target=prema_jezgri11\n"
+        "add action=jump chain=forward in-interface=BD-"+host+" jump-target=prema_jezgri12\n"
+        "add action=jump chain=forward jump-target=prema_pristupu12 out-interface=BD-"+host+"\n\n"
 
         "add chain=prema_jezgri11 action=drop protocol=tcp port=135,139,445\n"
         "add chain=prema_jezgri11 action=drop protocol=udp port=17,19,135,137,138,1900\n"

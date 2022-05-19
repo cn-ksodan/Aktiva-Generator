@@ -76,7 +76,7 @@ def write():
         "/ip pool add name=Javni-pool ranges="+ str(range+3) +"\n"
         "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP \n\n"
         "/ip firewall nat set [find where chain=srcnat] to-address=" + str(range+6)+"\n"
-        "/ip address add address="+str(range+6)+" interface=BD-"+host+"-javne\n"
+        "/ip address add address="+str(range+6)+ slash +" interface=BD-"+host+"-javne\n"
         )
         
         outBox.insert(1.0, Ans)

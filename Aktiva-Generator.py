@@ -72,11 +72,11 @@ def write():
     elif host and range and var.get()==3:
         Ans =("/interface bridge port set bridge=BD-"+ host + "-javne [find where interface=Gi1/4]\n\n"
         "/interface ethernet set [find default-name=ether4] comment=\"Access_eSkoleUTM\" \n\n"
+        "/ip address add address="+str(range+6)+ slash +" interface=BD-"+host+"-javne\n"
         "/ip dhcp-server network add address=" + str(range) + slash + " dns-server=193.198.184.130,193.198.184.140 gateway=" + str(range+1+var2.get()) + "\n"
         "/ip pool add name=Javni-pool ranges="+ str(range+3) +"\n"
         "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP \n\n"
         "/ip firewall nat set [find where chain=srcnat] to-address=" + str(range+6)+"\n"
-        "/ip address add address="+str(range+6)+ slash +" interface=BD-"+host+"-javne\n"
         )
         
         outBox.insert(1.0, Ans)

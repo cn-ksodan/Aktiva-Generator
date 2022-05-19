@@ -235,7 +235,7 @@ def titleGen():
 
     #provjera je li mail generiran za G3
     if(var.get() in (3,4)):
-        print(str(var.get()))
+        title=title + " - G3"
 
     #zamjena whitespace-ova, tabova sa jednim whitespace-om
     title=re.sub(r'\s+','%20',title)

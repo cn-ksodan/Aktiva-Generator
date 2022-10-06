@@ -134,11 +134,12 @@ def write():
 ##############UNDER CONSTRUCTION#################
 
 def sendMail():
-    if(field3.get()):
+    
+    recipient = 'rt+mreza-eskole@tt.carnet.hr'
 
+    if(field3.get() and var.get()!=3):
         #zastavica promjene konfiguracije
         flagInic=0
-        recipient = 'rt+mreza-eskole@tt.carnet.hr'
         subject, allIP, vlanID = titleGen()
         body=''
 
@@ -184,7 +185,18 @@ def sendMail():
 
         webbrowser.open('mailto:?to=' + recipient + '&subject=' + subject + '&body=' + body, new=1)
         
-    
+    # Grupa3, specificna tablica za mail - sve se mijenja, nova logika
+
+    elif(field3.get() and field1.get() and field2.get() and var.get()==3):
+
+        test=field3.get().split('	')
+        test[3]=test[3].replace("OSNOVNA ŠKOLA", "O.Š",1)
+        subject=(f"{test[0]} - {test[1]} - [{field2.get()}] - {test[3]}, {test[4]}, {test[5]} {test[6]} - {field1.get().upper()} - G3 - rekonfiguracija")
+        
+        body='%0D%0A%0D%0A**** TODO ****' + '%0D%0A%0D%0A**** ODRADENO ****'
+
+        webbrowser.open('mailto:?to=' + recipient + '&subject=' + subject + '&body=' + body, new=1)
+
     else:
      msgBox()
 
@@ -210,6 +222,7 @@ def titleGen():
 
     tehnologijaSpajanja=['ADSL','VDSL','GSM','HIBRID']
 
+    
     # RE za IPv4 adrese, subnet, hostname, naziv ustanove i adresu, vlan id
     allIP = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}[/]\d{2}",titleField)
     hostName=re.findall(r"\bMZOS-[\w-]+-1\b", titleField)[-1]

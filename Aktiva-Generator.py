@@ -191,7 +191,14 @@ def sendMail():
 
         test=field3.get().split('	')
         test[3]=test[3].replace("OSNOVNA ŠKOLA", "O.Š",1)
-        subject=(f"{test[0]} - {test[1]} - [{field2.get()}] - {test[3]}, {test[4]}, {test[5]} {test[6]} - {field1.get().upper()} - G3 - rekonfiguracija")
+
+        range = ipaddress.IPv4Address(field2.get())
+        if (var2.get()):
+            range=range+2
+        else:
+            range=range+1
+            
+        subject=(f"{test[0]} - {test[1]} - [{range}] - {test[3]}, {test[4]}, {test[5]} {test[6]} - {field1.get().upper()} - G3 - rekonfiguracija")
         
         body='%0D%0A%0D%0A**** TODO ****' + '%0D%0A%0D%0A**** ODRADENO ****'
 

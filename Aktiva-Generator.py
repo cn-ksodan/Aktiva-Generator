@@ -21,6 +21,18 @@ def write():
     else:
         host=host[0]
     slash="/" + fieldSlash.get()
+
+    additionInterfaceList="""\n\n/interface list add name=uplink
+/interface list member add list=uplink interface=Gi0/1
+/interface list member add list=uplink interface=Gi1/1
+/interface list member add list=uplink interface=Gi1/5
+/interface list member add list=uplink interface=Gi1/10
+/ip neighbor discovery set discover-interface-list=uplink\n
+/tool mac-server mac-winbox set allowed-interface-list=uplink\n"""
+
+
+
+
     
     
 
@@ -37,7 +49,7 @@ def write():
         "/ip dhcp-server network add address=" + str(range) + slash + " dhcp-option=Cisco,FortiPrimar,FortiBackup dns-server=193.198.184.130,193.198.184.140 gateway=" + str(range+1) + "\n"
         "/ip pool add name=Javni-pool ranges="+ str(range+3) +"\n"
         "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP \n\n"
-        "/ip route add distance=1 dst-address=" + str(range+4) + "/30 gateway=" + str(range+3) + "\n\n\n\n"
+        "/ip route add distance=1 dst-address=" + str(range+4) + "/30 gateway=" + str(range+3) + additionInterfaceList
         )
    
         outBox.insert(1.0, Ans)
@@ -76,7 +88,7 @@ def write():
         "/ip dhcp-server network add address=" + str(range) + slash + " dns-server=193.198.184.130,193.198.184.140 gateway=" + str(range+1+var2.get()) + "\n"
         "/ip pool add name=Javni-pool ranges="+ str(range+3) +"\n"
         "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP \n\n"
-        "/ip firewall nat set [find where chain=srcnat] to-address=" + str(range+6)+"\n"
+        "/ip firewall nat set [find where chain=srcnat] to-address=" + str(range+6)+ additionInterfaceList
         )
         
         outBox.insert(1.0, Ans)

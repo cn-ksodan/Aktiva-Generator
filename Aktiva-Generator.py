@@ -28,7 +28,8 @@ def write():
 /interface list member add list=uplink interface=Gi1/5
 /interface list member add list=uplink interface=Gi1/10
 /ip neighbor discovery set discover-interface-list=uplink\n
-/tool mac-server mac-winbox set allowed-interface-list=uplink\n"""
+/tool mac-server mac-winbox set allowed-interface-list=uplink\n
+/tool mac-server set allowed-interface-list=uplink"""
 
 
 

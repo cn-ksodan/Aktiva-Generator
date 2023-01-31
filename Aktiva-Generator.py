@@ -28,7 +28,8 @@ def write():
 /interface list member add list=uplink interface=Gi1/5
 /interface list member add list=uplink interface=Gi1/10
 /ip neighbor discovery set discover-interface-list=uplink\n
-/tool mac-server mac-winbox set allowed-interface-list=uplink\n"""
+/tool mac-server mac-winbox set allowed-interface-list=uplink\n
+/tool mac-server set allowed-interface-list=uplink"""
 
 
 
@@ -49,7 +50,7 @@ def write():
         "/ip dhcp-server network add address=" + str(range) + slash + " dhcp-option=Cisco,FortiPrimar,FortiBackup dns-server=193.198.184.130,193.198.184.140 gateway=" + str(range+1) + "\n"
         "/ip pool add name=Javni-pool ranges="+ str(range+3) +"\n"
         "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP \n\n"
-        "/ip route add distance=1 dst-address=" + str(range+4) + "/30 gateway=" + str(range+3) + additionInterfaceList
+        "/ip route add distance=1 dst-address=" + str(range+4) + "/30 gateway=" + str(range+3) + "\n"
         )
    
         outBox.insert(1.0, Ans)
@@ -76,9 +77,9 @@ def write():
         "add address=10.0.0.0/8 list=PL-privatne\n"
         "add address=172.16.0.0/12 list=PL-privatne\n"
         "add address=192.168.0.0/16 list=PL-privatne\n"
-        "add address=" + str(range) + slash + " list=PL-" + host + "\n\n\n"
-        "/interface ethernet set [find where name!=\"Gi0/1\" && name!=\"Gi1/1\" && name!=\"Gi1/4\" && running=no] disabled=yes\n"
-        )
+        "add address=" + str(range) + slash + " list=PL-" + host + "\n\n"
+        "/interface ethernet set [find where name!=\"Gi0/1\" && name!=\"Gi1/1\" && name!=\"Gi1/4\" && running=no] disabled=yes" + additionInterfaceList
+        ) 
         outBox.insert(1.0, Ans)
 
     elif host and range and var.get()==3:
@@ -88,7 +89,7 @@ def write():
         "/ip dhcp-server network add address=" + str(range) + slash + " dns-server=193.198.184.130,193.198.184.140 gateway=" + str(range+1+var2.get()) + "\n"
         "/ip pool add name=Javni-pool ranges="+ str(range+3) +"\n"
         "/ip dhcp-server add address-pool=Javni-pool disabled=no interface=BD-" + host + "-javne lease-time=1d10m name=Javni_DHCP \n\n"
-        "/ip firewall nat set [find where chain=srcnat] to-address=" + str(range+6)+ additionInterfaceList
+        "/ip firewall nat set [find where chain=srcnat] to-address=" + str(range+6) + "\n"
         )
         
         outBox.insert(1.0, Ans)
@@ -137,7 +138,8 @@ def write():
         "add action=drop chain=prema_jezgri12 dst-address-list=PL-privatne protocol=icmp src-address-list=PL-"+host+"-privatne\n"
         "add action=accept chain=prema_jezgri12 dst-address=0.0.0.0/0 src-address-list=PL-"+host+"-privatne\n"
         "add action=accept chain=prema_jezgri12 dst-address=0.0.0.0/0 protocol=icmp src-address-list=PL-"+host+"-privatne\n"
-        "add action=drop chain=prema_jezgri12 dst-address=0.0.0.0/0 src-address=0.0.0.0/0 ")
+        "add action=drop chain=prema_jezgri12 dst-address=0.0.0.0/0 src-address=0.0.0.0/0 " + additionInterfaceList
+        )
         outBox.insert(1.0, Ans)
 
     else:

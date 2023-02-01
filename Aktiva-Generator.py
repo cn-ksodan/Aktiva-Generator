@@ -147,7 +147,7 @@ def write():
     elif host and range and var.get()==5:   #"Javne Firewall"
         Ans = (      
         f"""/ip firewall address-list
-remove [find where dynamic=no]
+remove [find]
 add address=161.53.12.0/24 list=PL-CARNet
 add address=193.198.220.64/26 list=PL-CARNet
 add address=161.53.178.142/32 list=PL-CARNet
@@ -155,7 +155,7 @@ add address=172.17.128.0/26 list=PL-CARNet
 add address=10.0.0.0/8 list=PL-privatne
 add address=172.16.0.0/12 list=PL-privatne
 add address=192.168.0.0/16 list=PL-privatne
-add address={str(range)}/{slash} list=PL-{host}
+add address={str(range)}{slash} list=PL-{host}
 
 /ip firewall filter
 remove [find where dynamic=no]

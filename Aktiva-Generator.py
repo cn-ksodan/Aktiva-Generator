@@ -55,8 +55,20 @@ def write():
    
         outBox.insert(1.0, Ans)
 
-    elif host and range and var.get()==2:
-        Ans = ("/ip firewall filter\n"
+    elif host and range and var.get()==2:   #"G1&G2 Firewall"
+        Ans = (
+        "/ip firewall address-list\n"
+        "remove [find]\n"
+        "add address=161.53.12.0/24 list=PL-CARNet\n"
+        "add address=193.198.220.64/26 list=PL-CARNet\n"
+        "add address=161.53.178.142/32 list=PL-CARNet\n"
+        "add address=172.17.128.0/26 list=PL-CARNet\n"
+        "add address=10.0.0.0/8 list=PL-privatne\n"
+        "add address=172.16.0.0/12 list=PL-privatne\n"
+        "add address=192.168.0.0/16 list=PL-privatne\n"
+        "add address=" + str(range) + slash + " list=PL-" + host + "\n\n"
+            
+        "/ip firewall filter\n"
         "remove [find where dynamic=no]\n"
         "add action=drop chain=input port=8291 protocol=tcp src-address-list=!PL-CARNet\n"
         "add chain=forward in-interface=BD-" + host + "-javne action=jump jump-target=prema_jezgri11\n"
@@ -68,21 +80,11 @@ def write():
         "add chain=prema_jezgri11 action=accept src-address-list=PL-" + host + " dst-address=0.0.0.0/0\n"
         "add chain=prema_jezgri11 action=drop src-address=0.0.0.0/0 dst-address=0.0.0.0/0\n\n"
 
-        "/ip firewall address-list\n"
-        "remove [find]\n"
-        "add address=161.53.12.0/24 list=PL-CARNet\n"
-        "add address=193.198.220.64/26 list=PL-CARNet\n"
-        "add address=161.53.178.142/32 list=PL-CARNet\n"
-        "add address=172.17.128.0/26 list=PL-CARNet\n"
-        "add address=10.0.0.0/8 list=PL-privatne\n"
-        "add address=172.16.0.0/12 list=PL-privatne\n"
-        "add address=192.168.0.0/16 list=PL-privatne\n"
-        "add address=" + str(range) + slash + " list=PL-" + host + "\n\n"
         "/interface ethernet set [find where name!=\"Gi0/1\" && name!=\"Gi1/1\" && name!=\"Gi1/4\" && running=no] disabled=yes" + additionInterfaceList
         ) 
         outBox.insert(1.0, Ans)
 
-    elif host and range and var.get()==3:
+    elif host and range and var.get()==3:   #"G3 Rekonfig"
         Ans =("/interface bridge port set bridge=BD-"+ host + "-javne [find where interface=Gi1/4]\n\n"
         "/interface ethernet set [find default-name=ether4] comment=\"Access_eSkoleUTM\" \n\n"
         "/ip address add address="+str(range+6)+ slash +" interface=BD-"+host+"-javne\n"
@@ -94,7 +96,7 @@ def write():
         
         outBox.insert(1.0, Ans)
     
-    elif host and range and var.get()==4:
+    elif host and range and var.get()==4:   #"G3 Firewall"
         Ans = ("/ip firewall address-list\n" 
         "remove [find]\n"
         "add address=161.53.12.0/24 list=PL-CARNet\n"
@@ -111,9 +113,9 @@ def write():
         "remove [find where dynamic=no]\n\n"
 
         "add action=drop chain=input port=8291 protocol=tcp src-address-list=!PL-CARNet\n"
-        "add action=jump chain=forward in-interface=BD-"+host+"-javne jump-target=prema_jezgri11\n"
         "add action=jump chain=forward in-interface=BD-"+host+" jump-target=prema_jezgri12\n"
-        "add action=jump chain=forward jump-target=prema_pristupu12 out-interface=BD-"+host+"\n\n"
+        "add action=jump chain=forward jump-target=prema_pristupu12 out-interface=BD-"+host+"\n"
+        "add action=jump chain=forward in-interface=BD-"+host+"-javne jump-target=prema_jezgri11\n\n"
 
         "add chain=prema_jezgri11 action=drop protocol=tcp port=135,139,445\n"
         "add chain=prema_jezgri11 action=drop protocol=udp port=17,19,135,137,138,1900\n"
@@ -140,6 +142,58 @@ def write():
         "add action=accept chain=prema_jezgri12 dst-address=0.0.0.0/0 protocol=icmp src-address-list=PL-"+host+"-privatne\n"
         "add action=drop chain=prema_jezgri12 dst-address=0.0.0.0/0 src-address=0.0.0.0/0 " + additionInterfaceList
         )
+        outBox.insert(1.0, Ans)
+
+    elif host and range and var.get()==5:   #"Javne Firewall"
+        Ans = (      
+        f"""/ip firewall address-list
+remove [find where dynamic=no]
+add address=161.53.12.0/24 list=PL-CARNet
+add address=193.198.220.64/26 list=PL-CARNet
+add address=161.53.178.142/32 list=PL-CARNet
+add address=172.17.128.0/26 list=PL-CARNet
+add address=10.0.0.0/8 list=PL-privatne
+add address=172.16.0.0/12 list=PL-privatne
+add address=192.168.0.0/16 list=PL-privatne
+add address={str(range)}/{slash} list=PL-{host}
+
+/ip firewall filter
+remove [find where dynamic=no]
+add action=drop chain=input port=8291 protocol=tcp src-address-list=!PL-CARNet
+add chain=forward action=fasttrack-connection connection-state=established,related
+add chain=forward action=accept connection-state=established,related
+add chain=forward action=drop connection-state=invalid
+add chain=forward in-interface=BD-{host} action=jump jump-target=prema_jezgri11
+add chain=forward out-interface=BD-{host} action=jump jump-target=prema_pristupu11
+
+add chain=prema_pristupu11 action=drop protocol=tcp port=135,139,445
+add chain=prema_pristupu11 action=drop protocol=udp port=135,137,138
+add chain=prema_pristupu11 action=accept protocol=tcp dst-address-list=PL-{host}
+add chain=prema_pristupu11 action=accept protocol=udp dst-address-list=PL-{host}
+add chain=prema_pristupu11 action=accept protocol=gre dst-address-list=PL-{host}
+add chain=prema_pristupu11 action=accept protocol=ipsec-esp dst-address-list=PL-{host}
+add chain=prema_pristupu11 action=accept protocol=icmp dst-address-list=PL-{host}
+add chain=prema_pristupu11 action=drop src-address=0.0.0.0/0 dst-address=0.0.0.0/0
+
+add chain=prema_jezgri11 action=drop protocol=tcp port=135,139,445
+add chain=prema_jezgri11 action=drop protocol=udp port=17,19,135,137,138,1900
+add chain=prema_jezgri11 action=drop protocol=tcp src-address-list=PL-{host} dst-address-list=PL-privatne
+add chain=prema_jezgri11 action=drop protocol=udp src-address-list=PL-{host} dst-address-list=PL-privatne
+add chain=prema_jezgri11 action=drop protocol=icmp src-address-list=PL-{host} dst-address-list=PL-privatne
+add chain=prema_jezgri11 action=accept protocol=tcp src-address-list=PL-{host} dst-address=0.0.0.0/0
+add chain=prema_jezgri11 action=accept protocol=ipsec-esp src-address-list=PL-{host} dst-address=0.0.0.0/0
+add chain=prema_jezgri11 action=accept protocol=udp src-address-list=PL-{host} dst-address=0.0.0.0/0
+add chain=prema_jezgri11 action=accept protocol=gre src-address-list=PL-{host} dst-address=0.0.0.0/0
+add chain=prema_jezgri11 action=accept protocol=icmp src-address-list=PL-{host} dst-address=0.0.0.0/0
+add chain=prema_jezgri11 action=drop src-address=0.0.0.0/0 dst-address=0.0.0.0/0
+
+/interface list add name=uplink
+/interface list member add list=uplink interface=Gi0/1
+/interface list member add list=uplink interface=Gi1/1
+/ip neighbor discovery set discover-interface-list=uplink
+/tool mac-server mac-winbox set allowed-interface-list=uplink
+/tool mac-server set allowed-interface-list=uplink"""
+)
         outBox.insert(1.0, Ans)
 
     else:
@@ -325,10 +379,11 @@ fieldSlash.grid(row=1, column=1, sticky=E, padx=316, pady=2)
 
 var=IntVar()
 var2=IntVar()
-Radiobutton(main, text="Rekonfig", variable=var, value=1).grid(row=2,column=1, sticky=W, padx=265)
-Radiobutton(main, text="Firewall", variable=var, value=2).grid(row=2,column=1, sticky=W, padx=345)
-Radiobutton(main, text="G3 Rekonfig", variable=var, value=3).grid(row=2,column=1)
-Radiobutton(main, text="G3 Firewall", variable=var, value=4).grid(row=2,column=1, sticky=E, padx=330)
+Radiobutton(main, text="Rekonfig", variable=var, value=1).grid(row=2,column=1, sticky=W, padx=260)
+Radiobutton(main, text="G1&G2 Firewall", variable=var, value=2).grid(row=2,column=1, sticky=W, padx=335)
+Radiobutton(main, text="G3 Rekonfig", variable=var, value=3).grid(row=2,column=1, sticky=E, padx=385)
+Radiobutton(main, text="G3 Firewall", variable=var, value=4).grid(row=2,column=1, sticky=E, padx=300)
+Radiobutton(main, text="Javne Firewall", variable=var, value=5).grid(row=2,column=1, sticky=E, padx=200)
 Checkbutton(main, text="xDSL/GSM", variable=var2, activeforeground='red', offvalue=0, onvalue=1).grid(row=2,column=1,sticky=E, padx=100)
 
 Button(main, text='Očisti', command=clear, width=10).grid(row=1, column=2, sticky=W, padx=2, pady=2)

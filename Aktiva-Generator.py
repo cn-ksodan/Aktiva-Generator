@@ -55,8 +55,20 @@ def write():
    
         outBox.insert(1.0, Ans)
 
-    elif host and range and var.get()==2:
-        Ans = ("/ip firewall filter\n"
+    elif host and range and var.get()==2:   #"G1&G2 Firewall"
+        Ans = (
+        "/ip firewall address-list\n"
+        "remove [find]\n"
+        "add address=161.53.12.0/24 list=PL-CARNet\n"
+        "add address=193.198.220.64/26 list=PL-CARNet\n"
+        "add address=161.53.178.142/32 list=PL-CARNet\n"
+        "add address=172.17.128.0/26 list=PL-CARNet\n"
+        "add address=10.0.0.0/8 list=PL-privatne\n"
+        "add address=172.16.0.0/12 list=PL-privatne\n"
+        "add address=192.168.0.0/16 list=PL-privatne\n"
+        "add address=" + str(range) + slash + " list=PL-" + host + "\n\n"
+            
+        "/ip firewall filter\n"
         "remove [find where dynamic=no]\n"
         "add action=drop chain=input port=8291 protocol=tcp src-address-list=!PL-CARNet\n"
         "add chain=forward in-interface=BD-" + host + "-javne action=jump jump-target=prema_jezgri11\n"
@@ -68,16 +80,6 @@ def write():
         "add chain=prema_jezgri11 action=accept src-address-list=PL-" + host + " dst-address=0.0.0.0/0\n"
         "add chain=prema_jezgri11 action=drop src-address=0.0.0.0/0 dst-address=0.0.0.0/0\n\n"
 
-        "/ip firewall address-list\n"
-        "remove [find]\n"
-        "add address=161.53.12.0/24 list=PL-CARNet\n"
-        "add address=193.198.220.64/26 list=PL-CARNet\n"
-        "add address=161.53.178.142/32 list=PL-CARNet\n"
-        "add address=172.17.128.0/26 list=PL-CARNet\n"
-        "add address=10.0.0.0/8 list=PL-privatne\n"
-        "add address=172.16.0.0/12 list=PL-privatne\n"
-        "add address=192.168.0.0/16 list=PL-privatne\n"
-        "add address=" + str(range) + slash + " list=PL-" + host + "\n\n"
         "/interface ethernet set [find where name!=\"Gi0/1\" && name!=\"Gi1/1\" && name!=\"Gi1/4\" && running=no] disabled=yes" + additionInterfaceList
         ) 
         outBox.insert(1.0, Ans)
